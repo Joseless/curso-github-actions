@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Property {
+  id            String   @id @default(cuid())
+  slug          String   @unique
+  title         String
+  description   String   @default("")
+  
+  operationType String   @default("venta")
+  price         Float
+  currency      String   @default("CAD")
+  
+  country       String
+  city          String
+  zone          String
+  address       String   @default("")
+  
+  builtAreaM2   Float?
+  landAreaM2    Float?
+  bedrooms      Int?
+  bathrooms     Int?
+  parkingSpaces Int?
+  yearBuilt     Int?
+  
+  status        String   @default("disponible") // disponible | reservada | vendida
+  
+  mainImageUrl  String
+  imageUrls     String   @default("[]") // JSON array as string
+  
+  featured      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  leads         Lead[]
+  
+  @@index([city])
+  @@index([zone])
+  @@index([status])
+  @@index([price])
+}
+
+model Lead {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  name       String
+  email      String
+  phone      String
+  message    String   @default("")
+  createdAt  DateTime @default(now())
+  
+  @@index([propertyId])
+}
+

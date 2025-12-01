@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!--
   <<< Author notes: Header of the course >>>
   Read <https://skills.github.com/quickstart> for more information about how to build courses using this template.
@@ -431,3 +432,235 @@ Has aprendido sobre:
 ---
 
 &copy; 2023 Platzi &bull; [Código de Conducta](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [CC-BY-4.0 License](https://creativecommons.org/licenses/by/4.0/legalcode)
+=======
+# Property Sales Platform
+
+Plataforma completa de venta de propiedades desarrollada con Angular 20 (frontend) y NestJS (backend).
+
+> **📌 Nota para Cursor/IA**: Ver `.cursorrules` para contexto completo del proyecto, estructura, modelos de datos, endpoints, y convenciones de código.
+
+## 🚀 Stack Tecnológico
+
+### Frontend
+- **Angular 20**: Framework de aplicaciones web moderno
+- **Tailwind CSS**: Framework de CSS utility-first para diseño rápido
+- **TypeScript**: Lenguaje de programación tipado
+
+### Backend
+- **NestJS**: Framework Node.js progresivo para construir APIs robustas
+- **Prisma**: ORM moderno para TypeScript y Node.js
+- **SQLite**: Base de datos (fácilmente migrable a PostgreSQL, MySQL, etc.)
+- **TypeScript**: Lenguaje de programación tipado
+
+## 📋 Características
+
+- ✅ Listado de propiedades con filtros avanzados (ciudad, zona, precio, habitaciones)
+- ✅ Página de detalle con galería de imágenes
+- ✅ Formulario de contacto para captación de leads
+- ✅ Diseño responsive y moderno
+- ✅ Estados de carga y manejo de errores
+- ✅ API RESTful completa
+- ✅ Base de datos con Prisma ORM
+
+## 🏗️ Estructura del Proyecto
+
+```
+.
+├── backend/          # API NestJS + Prisma
+│   ├── src/
+│   │   ├── properties/   # Módulo de propiedades
+│   │   ├── leads/        # Módulo de leads
+│   │   └── prisma/       # Servicio de Prisma
+│   └── prisma/
+│       ├── schema.prisma # Esquema de base de datos
+│       └── seed.ts       # Datos de ejemplo (Ottawa, Canadá)
+│
+└── frontend/        # Aplicación Angular 20
+    └── src/
+        ├── app/
+        │   ├── components/  # Componentes reutilizables
+        │   ├── pages/       # Páginas principales
+        │   ├── services/    # Servicios (API)
+        │   └── models/      # Modelos de datos
+        └── styles.scss      # Estilos con Tailwind
+```
+
+## 🚀 Instalación y Configuración
+
+### Backend
+
+```bash
+cd backend
+
+# Instalar dependencias
+npm install
+
+# Generar cliente de Prisma
+npm run prisma:generate
+
+# Ejecutar migraciones
+npm run prisma:migrate
+
+# Poblar base de datos con datos de ejemplo (10 propiedades en Ottawa)
+npm run prisma:seed
+
+# Iniciar servidor de desarrollo
+npm run start:dev
+
+# El servidor estará disponible en http://localhost:3000
+```
+
+### Frontend
+
+```bash
+cd frontend
+
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm start
+
+# La aplicación estará disponible en http://localhost:4200
+```
+
+## 📡 Endpoints API
+
+### Propiedades
+
+- `GET /api/properties` - Obtener listado de propiedades
+  - Query params opcionales:
+    - `city`: Filtrar por ciudad
+    - `zone`: Filtrar por zona
+    - `minPrice`: Precio mínimo
+    - `maxPrice`: Precio máximo
+    - `bedrooms`: Número de habitaciones
+    - `status`: Estado (disponible, reservada, vendida)
+    - `orderBy`: Ordenamiento (price_asc, price_desc, recent)
+
+- `GET /api/properties/:slug` - Obtener detalle de una propiedad por slug
+
+### Leads
+
+- `POST /api/leads` - Crear un nuevo lead de contacto
+  ```json
+  {
+    "propertyId": "prop_123",
+    "name": "Juan Pérez",
+    "email": "juan@example.com",
+    "phone": "+52 555 555 5555",
+    "message": "Estoy interesado en agendar una visita"
+  }
+  ```
+
+## 🗄️ Modelo de Datos
+
+### Property
+- **id**: string (cuid generado por Prisma)
+- **slug**: string (único, formato: titulo-zona-precio)
+- **title**: string
+- **description**: string
+- **operationType**: 'venta' (fijo)
+- **price**: number
+- **currency**: 'USD' | 'CAD' | 'EUR'
+- **country, city, zone, address**: string
+- **builtAreaM2, landAreaM2**: number | null
+- **bedrooms, bathrooms, parkingSpaces, yearBuilt**: number | null
+- **status**: 'disponible' | 'reservada' | 'vendida'
+- **mainImageUrl**: string (URL de imagen principal)
+- **imageUrls**: string[] (array parseado desde JSON string en DB)
+- **featured**: boolean
+- **createdAt, updatedAt**: DateTime
+
+### Lead
+- **id**: string (cuid)
+- **propertyId**: string (FK a Property)
+- **name, email, phone**: string (requeridos)
+- **message**: string (opcional)
+- **createdAt**: DateTime
+
+## 🎨 Páginas y Componentes
+
+### Frontend Routes
+- `/propiedades` - Listado de propiedades con filtros
+- `/propiedades/:slug` - Detalle de propiedad con formulario de contacto
+
+### Componentes Principales
+
+**PropertiesListComponent** (`/propiedades`)
+- Filtros: ciudad, zona, precio min/max, habitaciones, ordenamiento
+- Grid responsive de tarjetas con imágenes
+- Estados: loading (skeleton), empty, error
+- Navegación a detalle con RouterLink
+
+**PropertyDetailComponent** (`/propiedades/:slug`)
+- Galería de imágenes (mainImageUrl + imageUrls array)
+- Características principales en grid
+- Descripción completa
+- Mapa placeholder
+- Formulario de contacto (CreateLeadDto)
+- Estados: loading, success, error
+
+**PropertiesService**
+- `getProperties(filters?)`: Observable<Property[]>
+- `getPropertyBySlug(slug)`: Observable<Property>
+- `createLead(lead)`: Observable<any>
+- API URL: `http://localhost:3000/api`
+
+## 📝 Datos de Ejemplo
+
+El seed incluye 10 propiedades de ejemplo en Ottawa, Canadá:
+- Condominios modernos
+- Casas familiares
+- Apartamentos de lujo
+- Propiedades en diferentes zonas (Centro, Westboro, Glebe, Kanata, etc.)
+
+## 🔧 Scripts Útiles
+
+### Backend
+- `npm run start:dev` - Desarrollo con hot-reload
+- `npm run prisma:studio` - Abrir Prisma Studio (GUI para base de datos)
+- `npm run prisma:seed` - Ejecutar seed de datos
+
+### Frontend
+- `npm start` - Servidor de desarrollo
+- `npm run build` - Build de producción
+
+## 🔧 Configuración Técnica
+
+### Backend
+- **Puerto**: 3000
+- **CORS**: Habilitado para `http://localhost:4200`
+- **Global Prefix**: `/api`
+- **Validation**: ValidationPipe global con `transform: true`
+- **Base de Datos**: SQLite (dev.db en `backend/prisma/`)
+
+### Frontend
+- **Puerto**: 4200
+- **API URL**: `http://localhost:3000/api`
+- **Tailwind**: Configurado en `tailwind.config.js`
+- **PostCSS**: Configurado para procesar Tailwind
+- **Standalone Components**: Angular 20 (sin NgModules)
+
+### Patrones de Implementación
+1. **Filtros**: Construidos dinámicamente, solo se agregan al `where` si tienen valor
+2. **ImageUrls**: Almacenados como JSON string en DB, parseados a array en service
+3. **Validación**: DTOs con decoradores `class-validator`
+4. **Errores**: `NotFoundException` para recursos no encontrados
+5. **Loading States**: Skeleton loaders durante carga
+6. **Formularios**: Reactive forms con validación HTML5 y `ngModel`
+
+## 📚 Próximos Pasos (Opcional)
+
+- [ ] SEO avanzado con meta tags dinámicas
+- [ ] Sistema de favoritos con localStorage
+- [ ] Propiedades similares
+- [ ] Paginación o infinite scroll
+- [ ] Integración con mapas reales (Google Maps, Mapbox)
+- [ ] Autenticación de usuarios
+- [ ] Panel de administración
+
+## 📄 Licencia
+
+MIT
+>>>>>>> bf3db55 (Initial commit)

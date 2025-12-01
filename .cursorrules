@@ -1,0 +1,187 @@
+# Contexto del Proyecto - Property Sales Platform
+
+## Stack Tecnológico
+
+### Frontend
+- Angular 20 (standalone components)
+- Tailwind CSS 3.4
+- TypeScript 5.6
+- RxJS para programación reactiva
+- Angular Router para navegación
+- Angular Forms para formularios
+
+### Backend
+- NestJS 10 (framework Node.js con TypeScript)
+- Prisma 5.9 (ORM)
+- SQLite (base de datos, fácil migración a PostgreSQL)
+- class-validator y class-transformer para validación
+
+## Estructura del Proyecto
+
+```
+.
+├── backend/              # API NestJS
+│   ├── src/
+│   │   ├── properties/   # Módulo de propiedades
+│   │   │   ├── properties.controller.ts
+│   │   │   ├── properties.service.ts
+│   │   │   └── dto/get-properties-query.dto.ts
+│   │   ├── leads/        # Módulo de leads
+│   │   │   ├── leads.controller.ts
+│   │   │   ├── leads.service.ts
+│   │   │   └── dto/create-lead.dto.ts
+│   │   ├── prisma/       # Servicio de Prisma
+│   │   │   ├── prisma.service.ts
+│   │   │   └── prisma.module.ts
+│   │   ├── app.module.ts
+│   │   └── main.ts
+│   └── prisma/
+│       ├── schema.prisma # Esquema de base de datos
+│       └── seed.ts       # 10 propiedades en Ottawa, Canadá
+│
+└── frontend/            # Aplicación Angular 20
+    └── src/
+        ├── app/
+        │   ├── components/
+        │   │   └── navbar/    # Componente de navegación
+        │   ├── pages/
+        │   │   ├── properties-list/    # Listado con filtros
+        │   │   └── property-detail/     # Detalle con formulario
+        │   ├── services/
+        │   │   └── properties.service.ts # Servicio API
+        │   ├── models/
+        │   │   └── property.model.ts     # Interfaces TypeScript
+        │   ├── app.component.ts
+        │   └── app.routes.ts
+        └── styles.scss                  # Tailwind CSS
+```
+
+## Modelo de Datos
+
+### Property (Prisma Schema)
+- id: string (cuid)
+- slug: string (único)
+- title: string
+- description: string
+- operationType: 'venta'
+- price: number
+- currency: 'USD' | 'CAD' | 'EUR'
+- country, city, zone, address: string
+- builtAreaM2, landAreaM2: number | null
+- bedrooms, bathrooms, parkingSpaces, yearBuilt: number | null
+- status: 'disponible' | 'reservada' | 'vendida'
+- mainImageUrl: string
+- imageUrls: string (JSON array como string en DB, parseado a array en API)
+- featured: boolean
+- createdAt, updatedAt: DateTime
+
+### Lead (Prisma Schema)
+- id: string (cuid)
+- propertyId: string (FK a Property)
+- name, email, phone: string
+- message: string
+- createdAt: DateTime
+
+## Endpoints API
+
+### GET /api/properties
+Query params opcionales:
+- city: string
+- zone: string
+- minPrice: number
+- maxPrice: number
+- bedrooms: number
+- status: string
+- orderBy: 'price_asc' | 'price_desc' | 'recent'
+
+Retorna: Array de Property con imageUrls parseado a array
+
+### GET /api/properties/:slug
+Retorna: Property con imageUrls parseado a array
+Error: 404 si no existe
+
+### POST /api/leads
+Body: { propertyId, name, email, phone, message? }
+Valida que la propiedad exista antes de crear el lead
+
+## Frontend - Componentes Principales
+
+### PropertiesListComponent
+- Ruta: /propiedades
+- Filtros: ciudad, zona, precio min/max, habitaciones, ordenamiento
+- Grid responsive de tarjetas
+- Estados: loading (skeleton), empty, error
+- Navegación a detalle con routerLink
+
+### PropertyDetailComponent
+- Ruta: /propiedades/:slug
+- Galería de imágenes (mainImageUrl + imageUrls array)
+- Características principales en grid
+- Descripción completa
+- Mapa placeholder
+- Formulario de contacto (CreateLeadDto)
+- Estados: loading, success, error
+
+### PropertiesService
+- apiUrl: 'http://localhost:3000/api'
+- getProperties(filters?): Observable<Property[]>
+- getPropertyBySlug(slug): Observable<Property>
+- createLead(lead): Observable<any>
+
+## Convenciones de Código
+
+### Backend
+- DTOs con class-validator para validación
+- Servicios inyectables con @Injectable()
+- Controladores con decoradores @Get, @Post, etc.
+- Prisma Service global para acceso a DB
+- Transformación de imageUrls (string JSON → array) en service
+
+### Frontend
+- Standalone components (Angular 20)
+- Services con providedIn: 'root'
+- Reactive forms con ngModel
+- Tailwind CSS para estilos (utility classes)
+- CommonModule para pipes (titlecase, etc.)
+- RouterLink para navegación
+
+## Configuración Importante
+
+### Backend
+- Puerto: 3000
+- CORS habilitado para http://localhost:4200
+- Global prefix: /api
+- ValidationPipe global con transform: true
+
+### Frontend
+- Puerto: 4200
+- API URL: http://localhost:3000/api
+- Tailwind configurado en tailwind.config.js
+- PostCSS configurado para Tailwind
+
+## Datos de Ejemplo
+
+El seed incluye 10 propiedades en Ottawa, Canadá:
+- Diferentes zonas: Centro, Westboro, ByWard Market, Glebe, Kanata, Nepean, Barrhaven, Centretown, Vanier, Downtown
+- Rangos de precio: $320,000 - $1,200,000 CAD
+- Variedad de tipos: condominios, casas, apartamentos, duplex
+- Estados: principalmente 'disponible'
+
+## Patrones de Implementación
+
+1. **Filtros**: Se construyen dinámicamente en el service, solo se agregan al where si tienen valor
+2. **ImageUrls**: Se almacenan como JSON string en DB, se parsean a array en el service antes de retornar
+3. **Validación**: DTOs con decoradores de class-validator
+4. **Errores**: NotFoundException para recursos no encontrados
+5. **Loading States**: Skeleton loaders en frontend durante carga
+6. **Formularios**: Reactive forms con validación HTML5 y ngModel
+
+## Notas Importantes
+
+- El proyecto usa SQLite para desarrollo, fácil migración a PostgreSQL
+- CORS configurado solo para desarrollo local
+- Los slugs se generan manualmente en el seed (formato: titulo-zona-precio)
+- Las imágenes usan URLs de Unsplash como placeholders
+- El formulario de contacto resetea después de éxito
+- Los filtros se aplican con botón "Aplicar Filtros"
+
